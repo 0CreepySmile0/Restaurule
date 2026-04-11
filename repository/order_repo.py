@@ -5,12 +5,12 @@ class OrderRepo:
     def __init__(self, db: DBConnector):
         self.db = db
 
-    def create_order(self, table_number, item_id, quantity):
+    def create_order(self, table_number, item_id, note, quantity):
         query = """
-        INSERT INTO orders (table_number, item_id, quantity, status)
+        INSERT INTO orders (table_number, item_id, note, quantity, status)
         VALUES (?, ?, ?, ?)
         """
-        self.db.execute(query, (table_number, item_id, quantity, "pending"))
+        self.db.execute(query, (table_number, item_id, note, quantity, "pending"))
 
     def get_order_by_id(self, order_id):
         query = """
