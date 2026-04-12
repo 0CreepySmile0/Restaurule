@@ -1,4 +1,4 @@
-from db import DBConnector
+from backend.db import DBConnector
 
 class ItemRepo:
 
@@ -45,8 +45,9 @@ class ItemRepo:
         query = f"""
             UPDATE items
             SET {', '.join(fields)}
-            WHERE item_id = ?
+            WHERE id = ?
         """
+        values.append(item_id)
 
         self.db.execute(query, values)
 

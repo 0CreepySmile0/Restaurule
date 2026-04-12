@@ -1,4 +1,4 @@
-from db import DBConnector
+from backend.db import DBConnector
 
 class OrderRepo:
 
