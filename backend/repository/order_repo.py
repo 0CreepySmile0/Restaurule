@@ -1,5 +1,13 @@
 from backend.db import DBConnector
 
+PENDING_STATUS = "pending"
+PAID_STATUS = "paid"
+CANCELLED_STATUS = "cancelled"
+COOKING_STATUS = "cooking"
+SERVING_STATUS = "serving"
+SERVED_STATUS = "served"
+
+
 class OrderRepo:
 
     def __init__(self, db: DBConnector):
@@ -10,7 +18,7 @@ class OrderRepo:
         INSERT INTO orders (table_number, item_id, note, quantity, status)
         VALUES (?, ?, ?, ?)
         """
-        self.db.execute(query, (table_number, item_id, note, quantity, "pending"))
+        self.db.execute(query, (table_number, item_id, note, quantity, PENDING_STATUS))
 
     def get_order_by_id(self, order_id):
         query = """
@@ -24,8 +32,8 @@ class OrderRepo:
         values = []
         if is_active:
             fields.append("status != ? AND status != ?")
-            values.append("paid")
-            values.append("cancelled")
+            values.append(PAID_STATUS)
+            values.append(CANCELLED_STATUS)
         if table_number is not None:
             fields.append("table_number = ?")
             values.append(table_number)
