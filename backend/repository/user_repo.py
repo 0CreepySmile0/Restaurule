@@ -87,3 +87,7 @@ class UserRepo:
             WHERE username = ?
         """
         self.db.execute(query, (self.pwd_context.hash(new_password), username))
+
+    def delete_user(self, user_id):
+        query = "DELETE FROM users WHERE id = ?"
+        self.db.execute(query, (user_id,))

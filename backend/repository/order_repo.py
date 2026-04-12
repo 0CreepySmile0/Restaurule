@@ -19,24 +19,19 @@ class OrderRepo:
         """
         return self.db.fetchone(query, (order_id,))
 
-    def get_all_orders(self):
-        query = "SELECT * FROM oders"
-        return self.db.fetchall(query)
+    def get_all_orders(self, is_active: bool=True, table_number=None):
+        fields = []
+        values = []
+        if is_active:
+            fields.append("status != ? AND status != ?")
+            values.append("paid")
+            values.append("cancelled")
+        if table_number is not None:
+            fields.append("table_number = ?")
+            values.append(table_number)
 
-    def get_all_active_orders(self):
-        query = """
-        SELECT * FROM orders
-        WHERE status != ?
-        """
-        return self.db.fetchall(query, ("paid",))
-
-    def get_all_orders_by_table_number(self, table_number):
-        query = """
-        SELECT * FROM orders
-        WHERE table_number = ?
-        AND status != ?
-        """
-        return self.db.fetchall(query, (table_number, "paid"))
+        query = "SELECT * FROM oders" + (f" WHERE {" AND ".join(fields)}" if fields else "")
+        return self.db.fetchall(query, values)
 
     def update_order_status(self, order_id, status):
         query = """
@@ -45,3 +40,7 @@ class OrderRepo:
         WHERE id = ?
         """
         self.db.execute(query, (status, order_id))
+
+    def delete_order(self, order_id):
+        query ="DELETE FROM orders WHERE id = ?"
+        self.db.execute(query, (order_id,))

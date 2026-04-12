@@ -51,4 +51,6 @@ class ItemRepo:
 
         self.db.execute(query, values)
 
-        
+    def delete_item(self, item_id):
+        query = "DELETE FROM items WHERE id = ?"
+        self.db.execute(query, (item_id,))
