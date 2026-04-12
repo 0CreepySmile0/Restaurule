@@ -28,6 +28,9 @@ class UserRepo:
         query = "SELECT * FROM users WHERE username = ?"
         return self.db.fetchone(query, (username,))
 
+    def get_users(self):
+        return self.db.fetchall("SELECT * FROM users")
+
     def is_username_exist(self, username):
         query = "SELECT * FROM users WHERE username = ?"
         return bool(self.db.fetchone(query, (username,)))
