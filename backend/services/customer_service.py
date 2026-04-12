@@ -17,6 +17,9 @@ class CustomerService:
         self.order_repo.update_order_status(order_id, CANCELLED_STATUS)
         return True
 
+    def view_orders(self, table_number):
+        return self.order_repo.get_all_orders(True, table_number)
+
     def checkout(self, table_number):
         orders = self.order_repo.get_all_orders(True, table_number)
         total = 0
