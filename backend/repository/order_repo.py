@@ -45,3 +45,7 @@ class OrderRepo:
         WHERE id = ?
         """
         self.db.execute(query, (status, order_id))
+
+    def delete_order(self, order_id):
+        query ="DELETE FROM orders WHERE id = ?"
+        self.db.execute(query, (order_id,))
