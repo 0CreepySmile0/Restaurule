@@ -41,6 +41,10 @@ class OrderRepo:
         query = "SELECT * FROM oders" + (f" WHERE {" AND ".join(fields)}" if fields else "")
         return self.db.fetchall(query, values)
 
+    def get_orders_by_status(self, status: list[str]):
+        query = "SELECT * FROM orders" + (f" WHERE {" OR ".join(["status = ?" for _ in status])}" if status else "")
+        return self.db.fetchall(query, status)
+
     def update_order_status(self, order_id, status):
         query = """
         UPDATE orders
