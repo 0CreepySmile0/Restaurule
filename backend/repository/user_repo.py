@@ -35,8 +35,10 @@ class UserRepo:
     def verify_password(self, username, password):
         user = self.get_user_by_username(username)
         if not user:
-            return False
-        return self.pwd_context.verify(password, user["password"])
+            return None
+        if not self.pwd_context.verify(password, user["password"]):
+            return None
+        return user
 
     def update_user(
             self,
@@ -78,7 +80,7 @@ class UserRepo:
         self.db.execute(query, values)
 
     def change_password(self, username, old_password, new_password):
-        if not self.verify_password(username, old_password):
+        if self.verify_password(username, old_password) is None:
             return
 
         query = f"""
