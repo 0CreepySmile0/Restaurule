@@ -1,11 +1,22 @@
 import uuid
+from pydantic import BaseModel
 from backend.db import DBConnector
 from passlib.context import CryptContext
 
 CHEF = "chef"
 WAITER = "waiter"
 WAITRESS = "waitress"
-AVAILABLE_ROLE = [CHEF, WAITER, WAITRESS]
+MANAGER = "manager"
+AVAILABLE_ROLE = [CHEF, WAITER, WAITRESS, MANAGER]
+
+class User(BaseModel):
+    id: uuid.UUID
+    username: str
+    password: str
+    first: str
+    last: str
+    role: str
+
 
 class UserRepo:
 
@@ -27,14 +38,21 @@ class UserRepo:
 
     def get_user_by_id(self, user_id):
         query = "SELECT * FROM users WHERE id = ?"
-        return self.db.fetchone(query, (user_id,))
+        user = self.db.fetchone(query, (user_id,))
+        if not user:
+            return None
+        return User(**user)
 
     def get_user_by_username(self, username):
         query = "SELECT * FROM users WHERE username = ?"
-        return self.db.fetchone(query, (username,))
+        user = self.db.fetchone(query, (username,))
+        if not user:
+            return None
+        return User(**user)
 
     def get_users(self):
-        return self.db.fetchall("SELECT * FROM users")
+        users = self.db.fetchall("SELECT * FROM users")
+        return [User(**user) for user in users]
 
     def is_username_exist(self, username):
         query = "SELECT * FROM users WHERE username = ?"
@@ -44,7 +62,7 @@ class UserRepo:
         user = self.get_user_by_username(username)
         if not user:
             return None
-        if not self.pwd_context.verify(password, user["password"]):
+        if not self.pwd_context.verify(password, user.password):
             return None
         return user
 
