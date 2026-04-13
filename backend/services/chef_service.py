@@ -15,6 +15,7 @@ class ChefService:
         return True
 
     def cancel_order(self, order_id):
+        """In case of insufficient ingredient to cook for that order"""
         order = self.order_repo.get_order_by_id(order_id)
         if order["status"] not in [PENDING_STATUS, COOKING_STATUS]:
             return False
