@@ -22,6 +22,12 @@ class AuthService:
             return None
         return self.session_repo.create_session(user["id"])
 
+    def get_session_by_id(self, session_id):
+        return self.session_repo.get_active_session_by_id(session_id)
+
+    def refresh_session(self, session_id):
+        self.session_repo.refresh_session(session_id)
+
     def logout(self, session_id):
         self.session_repo.delete_session(session_id)
 

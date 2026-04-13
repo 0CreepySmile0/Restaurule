@@ -24,6 +24,11 @@ class SessionRepo:
         query = "SELECT * FROM sessions" + (" WHERE expires_at > CURRENT_TIMESTAMP" if is_active else "")
         return self.db.fetchall(query)
 
+    def refresh_session(self, session_id):
+        new_expiry = datetime.now() + SESSION_DURATION
+        query = "UPDATE sessions SET expires_at = ? WHERE id = ?"
+        self.db.execute(query, (new_expiry, session_id))
+
     def delete_session(self, session_id):
         query = "DELETE FROM sessions WHERE id = ?"
         self.db.execute(query, (session_id,))
