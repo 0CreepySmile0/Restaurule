@@ -1,4 +1,6 @@
+import os
 from fastapi import FastAPI, Response, Request, HTTPException, Depends
+from dotenv import load_dotenv
 from backend.db import DBConnector
 from backend.repository.session_repo import SessionRepo
 from backend.repository.user_repo import UserRepo, User, CHEF, MANAGER
@@ -9,8 +11,9 @@ from backend.services.customer_service import CustomerService
 from backend.services.chef_service import ChefService
 from backend.requests import RegisterRequest, LoginRequest, OrderRequest
 
+load_dotenv()
 app = FastAPI()
-db = DBConnector(mock_data=True)
+db = DBConnector(os.environ.get("DB_FILE", "app.db"), os.environ.get("MOCK_DATA", False))
 session_repo = SessionRepo(db)
 user_repo = UserRepo(db)
 item_repo = ItemRepo(db)

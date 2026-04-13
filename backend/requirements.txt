@@ -3,3 +3,4 @@ uvicorn
 passlib
 pydantic
 argon2_cffi
+python-dotenv
