@@ -3,16 +3,20 @@ from fastapi import FastAPI, Response, Request, HTTPException, Depends
 from dotenv import load_dotenv
 from backend.db import DBConnector
 from backend.repository.session_repo import SessionRepo
-from backend.repository.user_repo import UserRepo, User, CHEF, MANAGER
+from backend.repository.user_repo import UserRepo, User, CHEF, MANAGER, WAITER, WAITRESS
 from backend.repository.item_repo import ItemRepo, Item
-from backend.repository.order_repo import OrderRepo, Order, PENDING_STATUS, SERVED_STATUS, COOKING_STATUS
+from backend.repository.order_repo import OrderRepo, Order, PENDING_STATUS, SERVED_STATUS, COOKING_STATUS, SERVING_STATUS
 from backend.services.auth_service import AuthService
 from backend.services.customer_service import CustomerService
 from backend.services.chef_service import ChefService
+from backend.services.waiter_service import WaiterService
 from backend.requests import RegisterRequest, LoginRequest, OrderRequest
 
 load_dotenv()
-app = FastAPI()
+app = FastAPI(
+    title="Restaurule API",
+    summary="API endpoints provided for Restaurule app"
+)
 db = DBConnector(os.environ.get("DB_FILE", "app.db"), os.environ.get("MOCK_DATA", False))
 session_repo = SessionRepo(db)
 user_repo = UserRepo(db)
@@ -21,6 +25,7 @@ order_repo = OrderRepo(db)
 auth_service = AuthService(user_repo, session_repo)
 customer_service = CustomerService(item_repo, order_repo)
 chef_service = ChefService(order_repo)
+waiter_service = WaiterService(order_repo)
 
 def get_current_user(request: Request):
     session_id = request.cookies.get("session_id")
@@ -33,6 +38,13 @@ def get_current_user(request: Request):
 
     user = auth_service.get_user_by_id(session.user_id)
     return user, session_id
+
+@app.get("/", include_in_schema=False)
+def hello():
+    return {
+        "message": "Welcome to Restaurule API!",
+        "help": "To see more information, navigate to /docs"
+    }
 
 @app.post("/register", status_code=201, tags=["Auth"])
 def register(data: RegisterRequest):
@@ -66,8 +78,8 @@ def login(response: Response, data: LoginRequest):
         key="session_id",
         value=session_id,
         httponly=True,
-        max_age=60 * 60 * 24,
-        secure=False,  # True in production (HTTPS)
+        max_age=os.environ.get("MAX_AGE", 60 * 60 * 24), # 1 day by default
+        secure=os.environ.get("HTTPS", False),  # True in production (HTTPS)
         samesite="lax"
     )
 
@@ -96,7 +108,7 @@ def view_menu():
     return items
 
 @app.get("/customer/orders/{table_number}", tags=["Customer"], response_model=list[Order])
-def view_orders(table_number: int):
+def customer_view_orders(table_number: int):
     try:
         orders = customer_service.view_orders(table_number)
     except Exception as e:
@@ -140,7 +152,7 @@ def checkout_orders(table_number: int):
     }
 
 @app.get("/chef", response_model=list[Order], tags=["Chef"])
-def view_orders(session_data: tuple[User | None, str] = Depends(get_current_user)):
+def chef_view_orders(session_data: tuple[User | None, str] = Depends(get_current_user)):
     user, session_id = session_data
     if user is None:
         raise HTTPException(403, "For chef only")
@@ -206,3 +218,35 @@ def finish_order(order_id: int, session_data: tuple[User | None, str] = Depends(
         raise HTTPException(400, f"Can only mark order with '{COOKING_STATUS}' status as done")
     auth_service.refresh_session(session_id)
     return {"message": "You finish an order!"}
+
+@app.get("/waiter", response_model=list[Order], tags=["Waiter"])
+def waiter_view_orders(session_data: tuple[User | None, str] = Depends(get_current_user)):
+    user, session_id = session_data
+    if user is None:
+        raise HTTPException(403, "For waiter only")
+    if user.role not in [WAITRESS, WAITER]:
+        raise HTTPException(403, "For waiter only")
+    try:
+        orders = waiter_service.read_orders()
+    except Exception as e:
+        raise HTTPException(500, e)
+    auth_service.refresh_session(session_id)
+    return orders
+
+@app.patch("/waiter/serve/{order_id}", tags=["Waiter"])
+def serve_order(order_id: int, session_data: tuple[User | None, str] = Depends(get_current_user)):
+    user, session_id = session_data
+    if user is None:
+        raise HTTPException(403, "For waiter only")
+    if user.role not in [WAITRESS, WAITER]:
+        raise HTTPException(403, "For waiter only")
+    try:
+        success = waiter_service.serve_dish(order_id)
+    except Exception as e:
+        raise HTTPException(500, e)
+    if success is None:
+        raise HTTPException(404, "Order not found")
+    if not success:
+        raise HTTPException(400, f"Can only serve order with '{SERVING_STATUS}' status")
+    auth_service.refresh_session(session_id)
+    return {"message": "You served the order!"}
