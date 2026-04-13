@@ -10,7 +10,7 @@ MANAGER = "manager"
 AVAILABLE_ROLE = [CHEF, WAITER, WAITRESS, MANAGER]
 
 class User(BaseModel):
-    id: uuid.UUID
+    id: str
     username: str
     password: str
     first: str
@@ -23,7 +23,7 @@ class UserRepo:
     def __init__(self, db: DBConnector):
         self.db = db
         self.pwd_context = CryptContext(
-            schemes=["bcrypt"],
+            schemes=["argon2"],
             deprecated="auto"
         )
 

@@ -1,6 +1,13 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+    first: str
+    last: str
+    role: str
+
 class LoginRequest(BaseModel):
     username: str
     password: str

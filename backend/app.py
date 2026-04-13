@@ -6,16 +6,32 @@ from backend.repository.item_repo import ItemRepo, Item
 from backend.repository.order_repo import OrderRepo, Order
 from backend.services.auth_service import AuthService
 from backend.services.customer_service import CustomerService
-from backend.requests import LoginRequest, OrderRequest
+from backend.requests import RegisterRequest, LoginRequest, OrderRequest
 
 app = FastAPI()
-db = DBConnector()
+db = DBConnector(mock_data=True)
 session_repo = SessionRepo(db)
 user_repo = UserRepo(db)
 item_repo = ItemRepo(db)
 order_repo = OrderRepo(db)
 auth_service = AuthService(user_repo, session_repo)
 customer_service = CustomerService(item_repo, order_repo)
+
+@app.post("/register", tags=["Auth"], status_code=201)
+def register(data: RegisterRequest):
+    try:
+        success = auth_service.register(
+            data.username,
+            data.password,
+            data.first,
+            data.last,
+            data.role
+        )
+    except Exception as e:
+        raise HTTPException(500, e)
+    if not success:
+        raise HTTPException(400, "Username existed or role not allowed")
+    return {"message": f"Successfully register '{data.username}'"}
 
 @app.post("/login", tags=["Auth"], status_code=201)
 def login(response: Response, data: LoginRequest):

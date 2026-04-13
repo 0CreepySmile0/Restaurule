@@ -6,8 +6,8 @@ from backend.db import DBConnector
 SESSION_DURATION = timedelta(days=1)
 
 class Session(BaseModel):
-    id: uuid.UUID
-    user_id: uuid.UUID
+    id: str
+    user_id: str
     expires_at: datetime
 
 
