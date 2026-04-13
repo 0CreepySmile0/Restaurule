@@ -1,4 +1,13 @@
 from backend.db import DBConnector
+from pydantic import BaseModel
+from typing import Optional
+
+class Item(BaseModel):
+    id: int
+    item_name: str
+    description: Optional[str] = None
+    price: float
+
 
 class ItemRepo:
 
@@ -17,11 +26,15 @@ class ItemRepo:
         SELECT * FROM items
         WHERE id = ?
         """
-        return self.db.fetchone(query, (item_id,))
+        item = self.db.fetchone(query, (item_id,))
+        if not item:
+            return None
+        return Item(**item)
 
     def get_all_items(self):
         query = "SELECT * FROM items"
-        return self.db.fetchall(query)
+        items = self.db.fetchall(query)
+        return [Item(**item) for item in items]
 
     def update_item(self, item_id, item_name=None, description=None, price=None):
         fields = []

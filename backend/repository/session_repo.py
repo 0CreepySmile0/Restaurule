@@ -1,8 +1,15 @@
 import uuid
 from datetime import datetime, timedelta
+from pydantic import BaseModel
 from backend.db import DBConnector
 
 SESSION_DURATION = timedelta(days=1)
+
+class Session(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    expires_at: datetime
+
 
 class SessionRepo:
 
@@ -18,11 +25,15 @@ class SessionRepo:
 
     def get_active_session_by_id(self, session_id):
         query = "SELECT * FROM sessions WHERE id = ? AND expires_at > CURRENT_TIMESTAMP"
-        return self.db.fetchone(query, (session_id,))
+        session = self.db.fetchone(query, (session_id,))
+        if not session:
+            return None
+        return Session(**session)
 
     def get_all_sessions(self, is_active: bool=True):
         query = "SELECT * FROM sessions" + (" WHERE expires_at > CURRENT_TIMESTAMP" if is_active else "")
-        return self.db.fetchall(query)
+        sessions = self.db.fetchall(query)
+        return [Session(**session) for session in sessions]
 
     def delete_session(self, session_id):
         query = "DELETE FROM sessions WHERE id = ?"
