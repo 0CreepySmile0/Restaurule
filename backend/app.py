@@ -122,9 +122,13 @@ def customer_cancel(order_id: int):
 @app.get("/customer/checkout/{table_number}", tags=["Customer"])
 def checkout_orders(table_number: int):
     try:
-        total = customer_service.checkout(table_number)
+        total, success = customer_service.checkout(table_number)
     except Exception as e:
         raise HTTPException(500, e)
     
-    return {"total": total}
+    return {
+        "total": total,
+        "checkout_success": success,
+        "message": "Successfully checkout" if success else "Can checkout only when all orders are 'served'"
+    }
     
