@@ -46,11 +46,16 @@ CREATE_TABLES = [
 ]
 
 
+"""
+Mock passwords are:
+manager: managerpass
+chef: chefpass
+waiter: waiterpass
+"""
 MOCK_DATA = [
-    "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u1', 'manager', 'managerpass', 'Alice', 'M', 'manager')",
-    "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u2', 'chef', 'chefpass', 'Bob', 'C', 'chef')",
-    "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u3', 'waiter', 'waiterpass', 'Carol', 'W', 'waiter')",
-    "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u4', 'customer', 'custpass', 'Dave', 'Q', 'customer')",
+    "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u1', 'manager', '$argon2id$v=19$m=65536,t=3,p=4$VYoxRmhNiXGutda6txZCqA$cRc6ieqkQ+w7RvFbk8h7hNVEwAUBl8aLr7OfjfOIm68', 'Alice', 'M', 'manager')",
+    "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u2', 'chef', '$argon2id$v=19$m=65536,t=3,p=4$836vtbbWei+ltDYGYGxN6Q$p+a9FdGK5Azij6LYpdvUgTpy4FL6jORpapR5pphOj2Y', 'Bob', 'C', 'chef')",
+    "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u3', 'waiter', '$argon2id$v=19$m=65536,t=3,p=4$bO3dW0upVQrBGCPEGANACA$6NzWw0trXc5JCXkYfmmD2IdJFmg6we1JKH++kNEt2wI', 'Carol', 'W', 'waiter')",
 
     "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (1, 'Margherita Pizza', 'Classic pizza with tomato and mozzarella', 8.99)",
     "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (2, 'Caesar Salad', 'Romaine lettuce, parmesan, croutons', 5.99)",
@@ -61,7 +66,6 @@ MOCK_DATA = [
 
     "INSERT OR IGNORE INTO sessions (id, user_id, expires_at) VALUES ('s1', 'u4', datetime('now', '+1 day'))",
 ]
-
 
 
 class DBConnector:
