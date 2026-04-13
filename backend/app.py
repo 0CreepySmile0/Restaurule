@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Response, Request, HTTPException, Depends
 from backend.db import DBConnector
 from backend.repository.session_repo import SessionRepo
-from backend.repository.user_repo import UserRepo
+from backend.repository.user_repo import UserRepo, User, CHEF, MANAGER
 from backend.repository.item_repo import ItemRepo, Item
 from backend.repository.order_repo import OrderRepo, Order
 from backend.services.auth_service import AuthService
 from backend.services.customer_service import CustomerService
+from backend.services.chef_service import ChefService
 from backend.requests import RegisterRequest, LoginRequest, OrderRequest
 
 app = FastAPI()
@@ -16,8 +17,21 @@ item_repo = ItemRepo(db)
 order_repo = OrderRepo(db)
 auth_service = AuthService(user_repo, session_repo)
 customer_service = CustomerService(item_repo, order_repo)
+chef_service = ChefService(order_repo)
 
-@app.post("/register", tags=["Auth"], status_code=201)
+def get_current_user(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id:
+        raise HTTPException(401)
+
+    session = auth_service.get_session_by_id(session_id)
+    if not session:
+        raise HTTPException(401)
+
+    user = auth_service.get_user_by_id(session.user_id)
+    return user, session_id
+
+@app.post("/register", status_code=201, tags=["Auth"])
 def register(data: RegisterRequest):
     try:
         success = auth_service.register(
@@ -31,9 +45,11 @@ def register(data: RegisterRequest):
         raise HTTPException(500, e)
     if not success:
         raise HTTPException(400, "Username existed or role not allowed")
+    if data.role == MANAGER:
+        raise HTTPException(403, "You cannot register as a manager")
     return {"message": f"Successfully register '{data.username}'"}
 
-@app.post("/login", tags=["Auth"], status_code=201)
+@app.post("/login", status_code=201, tags=["Auth"])
 def login(response: Response, data: LoginRequest):
     try:
         session_id = auth_service.login(data.username, data.password)
@@ -54,13 +70,13 @@ def login(response: Response, data: LoginRequest):
 
     return {"message": "Logged in"}
 
-@app.post("/logout", tags=["Auth"], status_code=204)
+@app.post("/logout", status_code=204, tags=["Auth"])
 def logout(request: Request, response: Response):
     session_id = request.cookies.get("session_id")
 
     if session_id:
         try:
-            auth_service.logout()
+            auth_service.logout(session_id)
         except Exception as e:
             raise HTTPException(500, e)
 
@@ -68,19 +84,7 @@ def logout(request: Request, response: Response):
 
     return {"message": "Logged out"}
 
-def get_current_user(request: Request):
-    session_id = request.cookies.get("session_id")
-    if not session_id:
-        raise HTTPException(401)
-
-    session = auth_service.get_session_by_id(session_id)
-    if not session:
-        raise HTTPException(401)
-
-    user = auth_service.get_user_by_id(session.user_id)
-    return user
-
-@app.get("/customer", tags=["Customer"], response_model=list[Item])
+@app.get("/customer", response_model=list[Item], tags=["Customer"])
 def view_menu():
     try:
         items = customer_service.view_menu()
