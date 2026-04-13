@@ -12,6 +12,8 @@ class CustomerService:
 
     def cancel_order(self, order_id):
         order = self.order_repo.get_order_by_id(order_id)
+        if order is None:
+            return None
         if order.status != PENDING_STATUS:
             return False
         self.order_repo.update_order_status(order_id, CANCELLED_STATUS)
@@ -19,6 +21,9 @@ class CustomerService:
 
     def view_orders(self, table_number):
         return self.order_repo.get_all_orders(True, table_number)
+
+    def view_menu(self):
+        return self.item_repo.get_all_items()
 
     def checkout(self, table_number):
         orders = self.order_repo.get_all_orders(True, table_number)
