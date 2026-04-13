@@ -2,6 +2,11 @@ import uuid
 from backend.db import DBConnector
 from passlib.context import CryptContext
 
+CHEF = "chef"
+WAITER = "waiter"
+WAITRESS = "waitress"
+AVAILABLE_ROLE = [CHEF, WAITER, WAITRESS]
+
 class UserRepo:
 
     def __init__(self, db: DBConnector):
@@ -82,9 +87,9 @@ class UserRepo:
 
         self.db.execute(query, values)
 
-    def change_password(self, username, old_password, new_password):
+    def change_password(self, username, old_password, new_password) -> bool:
         if self.verify_password(username, old_password) is None:
-            return
+            return False
 
         query = f"""
             UPDATE users
@@ -92,6 +97,7 @@ class UserRepo:
             WHERE username = ?
         """
         self.db.execute(query, (self.pwd_context.hash(new_password), username))
+        return True
 
     def delete_user(self, user_id):
         query = "DELETE FROM users WHERE id = ?"
