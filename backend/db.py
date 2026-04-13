@@ -57,14 +57,10 @@ MOCK_DATA = [
     "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u2', 'chef', '$argon2id$v=19$m=65536,t=3,p=4$836vtbbWei+ltDYGYGxN6Q$p+a9FdGK5Azij6LYpdvUgTpy4FL6jORpapR5pphOj2Y', 'Bob', 'C', 'chef')",
     "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u3', 'waiter', '$argon2id$v=19$m=65536,t=3,p=4$bO3dW0upVQrBGCPEGANACA$6NzWw0trXc5JCXkYfmmD2IdJFmg6we1JKH++kNEt2wI', 'Carol', 'W', 'waiter')",
 
-    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (1, 'Margherita Pizza', 'Classic pizza with tomato and mozzarella', 8.99)",
-    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (2, 'Caesar Salad', 'Romaine lettuce, parmesan, croutons', 5.99)",
-    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (3, 'Espresso', 'Strong coffee shot', 2.50)",
-
-    "INSERT OR IGNORE INTO orders (id, table_number, item_id, note, quantity, status) VALUES (1, 12, 1, 'No olives', 1, 'pending')",
-    "INSERT OR IGNORE INTO orders (id, table_number, item_id, note, quantity, status) VALUES (2, 5, 3, '', 2, 'served')",
-
-    "INSERT OR IGNORE INTO sessions (id, user_id, expires_at) VALUES ('s1', 'u4', datetime('now', '+1 day'))",
+    "INSERT OR IGNORE INTO items (item_name, description, price) VALUES ('กะเพราหมูสับ', 'เมนูบ้านๆที่คนไทยรัก', 40)",
+    "INSERT OR IGNORE INTO items (item_name, description, price) VALUES ('กะเพราไก่สับ', 'อีกหนึ่งเมนูบ้านๆ แต่เป็นเนื้อไก่แทน', 40)",
+    "INSERT OR IGNORE INTO items (item_name, price) VALUES ('ข้าวเปล่า', 10)",
+    "INSERT OR IGNORE INTO items (item_name, description, price) VALUES ('ข้าวไข่เจียว', 'มีไข่ 3 ฟอง', 25)"
 ]
 
 
