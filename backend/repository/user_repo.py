@@ -2,6 +2,11 @@ import uuid
 from backend.db import DBConnector
 from passlib.context import CryptContext
 
+CHEF = "chef"
+WAITER = "waiter"
+WAITRESS = "waitress"
+AVAILABLE_ROLE = [CHEF, WAITER, WAITRESS]
+
 class UserRepo:
 
     def __init__(self, db: DBConnector):

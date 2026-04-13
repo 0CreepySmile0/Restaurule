@@ -1,7 +1,6 @@
-from backend.repository.user_repo import UserRepo
+from backend.repository.user_repo import UserRepo, AVAILABLE_ROLE
 from backend.repository.session_repo import SessionRepo
 
-AVAILABLE_ROLE = ["chef", "waiter", "waitress", "cashier"]
 
 class AuthService:
 
@@ -35,10 +34,8 @@ class AuthService:
     def change_password(self, username, old_password, new_password) -> bool:
         return self.user_repo.change_password(username, old_password, new_password)
 
-    def update_profile(self, user_id, username, first, last, role) -> bool:
-        if role not in AVAILABLE_ROLE:
-            return False
+    def update_profile(self, user_id, username, first, last) -> bool:
         if self.user_repo.is_username_exist(username):
             return False
-        self.user_repo.update_user(user_id, username, first, last, role)
+        self.user_repo.update_user(user_id, username, first, last)
         return True
