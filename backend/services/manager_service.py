@@ -1,18 +1,11 @@
 from backend.repository.item_repo import ItemRepo
-from backend.repository.order_repo import OrderRepo
 from backend.repository.user_repo import UserRepo
 from backend.services.auth_service import AVAILABLE_ROLE
 
 class ManagerService:
 
-    def __init__(
-            self,
-            item_repo: ItemRepo,
-            order_repo: OrderRepo,
-            user_repo: UserRepo
-    ):
+    def __init__(self, item_repo: ItemRepo, user_repo: UserRepo):
         self.item_repo = item_repo
-        self.order_repo = order_repo
         self.user_repo = user_repo
 
     def create_staff_account(self, username, password, first, last, role):

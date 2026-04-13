@@ -20,7 +20,7 @@ class AuthService:
         user = self.user_repo.verify_password(username, password)
         if user is None:
             return None
-        return self.session_repo.create_session(user["id"])
+        return self.session_repo.create_session(user.id)
 
     def get_session_by_id(self, session_id):
         return self.session_repo.get_active_session_by_id(session_id)

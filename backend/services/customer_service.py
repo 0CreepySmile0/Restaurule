@@ -12,7 +12,7 @@ class CustomerService:
 
     def cancel_order(self, order_id):
         order = self.order_repo.get_order_by_id(order_id)
-        if order["status"] != PENDING_STATUS:
+        if order.status != PENDING_STATUS:
             return False
         self.order_repo.update_order_status(order_id, CANCELLED_STATUS)
         return True
@@ -24,8 +24,8 @@ class CustomerService:
         orders = self.order_repo.get_all_orders(True, table_number)
         total = 0
         for order in orders:
-            if order["status"] == SERVED_STATUS:
-                item = self.item_repo.get_item_by_id(order["item_id"])
-                total += item["price"]
-                self.order_repo.update_order_status(order["id"], PAID_STATUS)
+            if order.status == SERVED_STATUS:
+                item = self.item_repo.get_item_by_id(order.item_id)
+                total += item.price
+                self.order_repo.update_order_status(order.id, PAID_STATUS)
         return total
