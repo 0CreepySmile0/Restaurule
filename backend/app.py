@@ -3,7 +3,7 @@ from backend.db import DBConnector
 from backend.repository.session_repo import SessionRepo
 from backend.repository.user_repo import UserRepo, User, CHEF, MANAGER
 from backend.repository.item_repo import ItemRepo, Item
-from backend.repository.order_repo import OrderRepo, Order
+from backend.repository.order_repo import OrderRepo, Order, PENDING_STATUS, SERVED_STATUS, COOKING_STATUS
 from backend.services.auth_service import AuthService
 from backend.services.customer_service import CustomerService
 from backend.services.chef_service import ChefService
@@ -100,7 +100,7 @@ def view_orders(table_number: int):
         raise HTTPException(500, e)
     return orders
 
-@app.post("/customer/order-food/{table_number}", tags=["Customer"])
+@app.post("/customer/order/{table_number}", tags=["Customer"])
 def order(table_number: int, data: OrderRequest):
     try:
         customer_service.order_item(table_number, data.item_id, data.note, data.quantity)
@@ -108,7 +108,7 @@ def order(table_number: int, data: OrderRequest):
         raise HTTPException(500, e)
     return {"message": "Order created"}
 
-@app.patch("/customer/cancel-order/{order_id}", tags=["Customer"])
+@app.patch("/customer/cancel/{order_id}", tags=["Customer"])
 def customer_cancel(order_id: int):
     try:
         success = customer_service.cancel_order(order_id)
@@ -119,7 +119,7 @@ def customer_cancel(order_id: int):
         raise HTTPException(404, "Order not found")
     
     if not success:
-        raise HTTPException(400, "Only able to cancel 'pending' status")
+        raise HTTPException(400, f"Only able to cancel '{PENDING_STATUS}' status")
     
     return {"message": "Order cancelled"}
 
@@ -133,6 +133,73 @@ def checkout_orders(table_number: int):
     return {
         "total": total,
         "checkout_success": success,
-        "message": "Successfully checkout" if success else "Can checkout only when all orders are 'served'"
+        "message": "Successfully checkout" if success else f"Can checkout only when all orders are '{SERVED_STATUS}'"
     }
-    
+
+@app.get("/chef", response_model=list[Order], tags=["Chef"])
+def view_orders(session_data: tuple[User | None, str] = Depends(get_current_user)):
+    user, session_id = session_data
+    if user is None:
+        raise HTTPException(403, "For chef only")
+    if user.role != CHEF:
+        raise HTTPException(403, "For chef only")
+    try:
+        orders = chef_service.view_orders()
+    except Exception as e:
+        raise HTTPException(500, e)
+    auth_service.refresh_session(session_id)
+    return orders
+
+@app.patch("/chef/cook/{order_id}", tags=["Chef"])
+def cook(order_id: int, session_data: tuple[User | None, str] = Depends(get_current_user)):
+    user, session_id = session_data
+    if user is None:
+        raise HTTPException(403, "For chef only")
+    if user.role != CHEF:
+        raise HTTPException(403, "For chef only")
+    try:
+        success = chef_service.cook_dish(order_id)
+    except Exception as e:
+        raise HTTPException(500, e)
+    if success is None:
+        raise HTTPException(404, "Order not found")
+    if not success:
+        raise HTTPException(400, f"Can only cook order with '{PENDING_STATUS}' status")
+    auth_service.refresh_session(session_id)
+    return {"message": "You start cooking order!"}
+
+@app.patch("/chef/cancel/{order_id}", tags=["Chef"])
+def chef_cancel(order_id: int, session_data: tuple[User | None, str] = Depends(get_current_user)):
+    user, session_id = session_data
+    if user is None:
+        raise HTTPException(403, "For chef only")
+    if user.role != CHEF:
+        raise HTTPException(403, "For chef only")
+    try:
+        success = chef_service.cancel_order(order_id)
+    except Exception as e:
+        raise HTTPException(500, e)
+    if success is None:
+        raise HTTPException(404, "Order not found")
+    if not success:
+        raise HTTPException(400, f"Only able to cancel '{PENDING_STATUS}' or '{COOKING_STATUS}' status")
+    auth_service.refresh_session(session_id)
+    return {"message": "Order cancelled"}
+
+@app.patch("/chef/finish/{order_id}", tags=["Chef"])
+def finish_order(order_id: int, session_data: tuple[User | None, str] = Depends(get_current_user)):
+    user, session_id = session_data
+    if user is None:
+        raise HTTPException(403, "For chef only")
+    if user.role != CHEF:
+        raise HTTPException(403, "For chef only")
+    try:
+        success = chef_service.done_dish(order_id)
+    except Exception as e:
+        raise HTTPException(500, e)
+    if success is None:
+        raise HTTPException(404, "Order not found")
+    if not success:
+        raise HTTPException(400, f"Can only mark order with '{COOKING_STATUS}' status as done")
+    auth_service.refresh_session(session_id)
+    return {"message": "You finish an order!"}
