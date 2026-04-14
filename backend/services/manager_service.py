@@ -23,7 +23,8 @@ class ManagerService:
     def update_staff_role(self, user_id, role):
         if role not in AVAILABLE_ROLE:
             return False
-        return self.user_repo.update_user(user_id, role=role)
+        self.user_repo.update_user(user_id, role=role)
+        return True
 
     def delete_staff_account(self, user_id):
         self.user_repo.delete_user(user_id)
