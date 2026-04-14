@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, Response, Request, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from backend.db import DBConnector
 from backend.repository.session_repo import SessionRepo
@@ -21,6 +22,16 @@ app = FastAPI(
     title="Restaurule API",
     summary="API endpoints provided for Restaurule app"
 )
+
+origins = os.environ.get("ORIGINS", "http://localhost:3000")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins.split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 db = DBConnector(os.environ.get("DB_FILE", "app.db"), os.environ.get("MOCK_DATA", False))
 session_repo = SessionRepo(db)
 user_repo = UserRepo(db)
