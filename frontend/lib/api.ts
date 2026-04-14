@@ -66,10 +66,6 @@ export async function cancelOrder(orderId: number) {
   return request(`/customer/cancel/${orderId}`, { method: "PATCH" });
 }
 
-export async function checkout(tableNumber: number) {
-  return request(`/customer/checkout/${tableNumber}`);
-}
-
 // Auth
 export async function register(data: { username: string; password: string; first: string; last: string; role: string }) {
   return request(`/register`, { method: "POST", body: JSON.stringify(data) });
@@ -107,6 +103,10 @@ export async function waiterViewOrders(): Promise<Order[]> {
 
 export async function serveOrder(orderId: number) {
   return request(`/waiter/serve/${orderId}`, { method: "PATCH" });
+}
+
+export async function checkout(tableNumber: number) {
+  return request(`/waiter/checkout/${tableNumber}`);
 }
 
 // Manager: staff
