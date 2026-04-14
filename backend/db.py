@@ -57,10 +57,10 @@ MOCK_DATA = [
     "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u2', 'chef', '$argon2id$v=19$m=65536,t=3,p=4$836vtbbWei+ltDYGYGxN6Q$p+a9FdGK5Azij6LYpdvUgTpy4FL6jORpapR5pphOj2Y', 'Bob', 'C', 'chef')",
     "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u3', 'waiter', '$argon2id$v=19$m=65536,t=3,p=4$bO3dW0upVQrBGCPEGANACA$6NzWw0trXc5JCXkYfmmD2IdJFmg6we1JKH++kNEt2wI', 'Carol', 'W', 'waiter')",
 
-    "INSERT OR IGNORE INTO items (item_name, description, price) VALUES ('กะเพราหมูสับ', 'เมนูบ้านๆที่คนไทยรัก', 40)",
-    "INSERT OR IGNORE INTO items (item_name, description, price) VALUES ('กะเพราไก่สับ', 'อีกหนึ่งเมนูบ้านๆ แต่เป็นเนื้อไก่แทน', 40)",
-    "INSERT OR IGNORE INTO items (item_name, price) VALUES ('ข้าวเปล่า', 10)",
-    "INSERT OR IGNORE INTO items (item_name, description, price) VALUES ('ข้าวไข่เจียว', 'มีไข่ 3 ฟอง', 25)"
+    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (1, 'กะเพราหมูสับ', 'เมนูบ้านๆที่คนไทยรัก', 40)",
+    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (2, 'กะเพราไก่สับ', 'อีกหนึ่งเมนูบ้านๆ แต่เป็นเนื้อไก่แทน', 40)",
+    "INSERT OR IGNORE INTO items (id, item_name, price) VALUES (3, 'ข้าวเปล่า', 10)",
+    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (4, 'ข้าวไข่เจียว', 'มีไข่ 3 ฟอง', 25)"
 ]
 
 
