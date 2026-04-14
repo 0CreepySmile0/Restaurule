@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { getMenu } from "../lib/api";
+import { getMenu, postCustomerOrder } from "../lib/api";
 
 type MenuItem = {
   id: number;
@@ -15,10 +15,49 @@ export default function Home() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tableNumber, setTableNumber] = useState<number | null>(null);
+  const [showTablePrompt, setShowTablePrompt] = useState(false);
+  const [tableInput, setTableInput] = useState("");
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [orderNote, setOrderNote] = useState("");
+  const [orderQuantity, setOrderQuantity] = useState<number>(1);
+  const [ordering, setOrdering] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
+  const [orderSuccess, setOrderSuccess] = useState<string | null>(null);
 
   const appName = process.env.NEXT_PUBLIC_RESTAURANT_NAME || "Restaurule";
 
   useEffect(() => {
+    // Table number persistence: check localStorage for existing table and expiry
+    const STORAGE_KEY = "restaurule_table";
+    const TTL = 2 * 60 * 60 * 1000; // 2 hours in ms
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const ts = parsed?.ts ?? 0;
+        const num = parsed?.tableNumber ?? null;
+        const age = Date.now() - ts;
+        if (num != null && age < TTL) {
+          setTableNumber(Number(num));
+          // schedule expiry
+          setTimeout(() => {
+            localStorage.removeItem(STORAGE_KEY);
+            setTableNumber(null);
+            setShowTablePrompt(true);
+          }, TTL - age);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+          setShowTablePrompt(true);
+        }
+      } else {
+        setShowTablePrompt(true);
+      }
+    } catch (e) {
+      setShowTablePrompt(true);
+    }
+
     let mounted = true;
     setLoading(true);
     getMenu()
@@ -37,12 +76,106 @@ export default function Home() {
     };
   }, []);
 
+  const saveTableNumber = (n: number) => {
+    const STORAGE_KEY = "restaurule_table";
+    const TTL = 2 * 60 * 60 * 1000; // 2 hours
+    const payload = { tableNumber: n, ts: Date.now() };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      // ignore storage errors
+    }
+    setTableNumber(n);
+    setShowTablePrompt(false);
+    setTimeout(() => {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+      setTableNumber(null);
+      setShowTablePrompt(true);
+    }, TTL);
+  };
+
+  const handleTableSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const v = Number(tableInput);
+    if (!Number.isInteger(v) || v <= 0) return;
+    saveTableNumber(v);
+  };
+
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "THB", minimumFractionDigits: 2 }).format(n);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black font-sans p-6">
       <div className="w-full max-w-3xl">
+        {showTablePrompt && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
+            <form onSubmit={handleTableSubmit} className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-lg w-full max-w-sm">
+              <h2 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-50">Welcome — what's your table number?</h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">We'll remember this table for 2 hours.</p>
+              <input
+                type="number"
+                min={1}
+                value={tableInput}
+                onChange={(e) => setTableInput(e.target.value)}
+                className="w-full p-2 border rounded mb-4 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
+                placeholder="Table number"
+                required
+              />
+              <div className="flex gap-2 justify-end">
+                <button type="submit" className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">Confirm</button>
+              </div>
+            </form>
+          </div>
+        )}
+        {selectedItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!tableNumber) return setShowTablePrompt(true);
+                setOrdering(true);
+                setOrderError(null);
+                try {
+                  await postCustomerOrder(tableNumber, selectedItem.id, orderNote || undefined, orderQuantity);
+                  setOrderSuccess("Order placed");
+                  setSelectedItem(null);
+                } catch (err: any) {
+                  setOrderError(err?.message || String(err) || "Order failed");
+                } finally {
+                  setOrdering(false);
+                }
+              }}
+              className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-lg w-full max-w-md"
+            >
+              <h2 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-50">Order: {selectedItem.item_name}</h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Add a note (optional) and quantity then confirm your order.</p>
+              <textarea
+                value={orderNote}
+                onChange={(e) => setOrderNote(e.target.value)}
+                placeholder="Add note (e.g., no onions)"
+                className="w-full p-2 border rounded mb-3 h-20 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
+              />
+              <div className="flex items-center gap-3 mb-4">
+                <label className="text-sm text-zinc-700 dark:text-zinc-300">Quantity</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={orderQuantity}
+                  onChange={(e) => setOrderQuantity(Math.max(1, Number(e.target.value || 1)))}
+                  className="w-20 p-2 border rounded bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
+                />
+                <div className="ml-auto text-sm text-zinc-700 dark:text-zinc-300">Price: {fmt(selectedItem.price)}</div>
+              </div>
+              {orderError && <div className="text-sm text-red-600 mb-2">{orderError}</div>}
+              <div className="flex gap-2 justify-end">
+                <button type="button" onClick={() => setSelectedItem(null)} className="px-4 py-2 bg-transparent border rounded text-zinc-700 dark:text-zinc-300">Cancel</button>
+                <button type="submit" disabled={ordering} className="px-4 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">{ordering ? "Ordering…" : "Order"}</button>
+              </div>
+            </form>
+          </div>
+        )}
         <header className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-50">
             {appName}
@@ -59,7 +192,26 @@ export default function Home() {
             <div className="p-6 text-center text-zinc-600">No items available.</div>
           ) : (
             items.map((it) => (
-              <div key={it.id} className="flex items-start justify-between p-6 hover:bg-zinc-50 dark:hover:bg-zinc-900">
+              <div
+                key={it.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  setSelectedItem(it);
+                  setOrderNote("");
+                  setOrderQuantity(1);
+                  setOrderError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    setSelectedItem(it);
+                    setOrderNote("");
+                    setOrderQuantity(1);
+                    setOrderError(null);
+                  }
+                }}
+                className="flex items-start justify-between p-6 hover:bg-zinc-50 dark:hover:bg-zinc-900 cursor-pointer"
+              >
                 <div className="flex flex-col">
                   <div className="text-lg font-medium text-zinc-900 dark:text-zinc-50">{it.item_name}</div>
                   {it.description ? (
