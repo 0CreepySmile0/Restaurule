@@ -1,4 +1,4 @@
-from backend.repository.order_repo import OrderRepo, SERVED_STATUS, SERVING_STATUS, COOKING_STATUS, PAID_STATUS
+from backend.repository.order_repo import OrderRepo, SERVED_STATUS, SERVING_STATUS, PAID_STATUS
 
 class WaiterService:
 
@@ -6,7 +6,7 @@ class WaiterService:
         self.order_repo = order_repo
 
     def read_orders(self):
-        return self.order_repo.get_orders_by_status([COOKING_STATUS, SERVING_STATUS])
+        return self.order_repo.get_all_orders(True)
 
     def serve_dish(self, order_id):
         order = self.order_repo.get_order_by_id(order_id)
