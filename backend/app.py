@@ -64,7 +64,7 @@ def register(data: RegisterRequest):
     except Exception as e:
         raise HTTPException(500, e)
     if not success:
-        raise HTTPException(400, "Username existed or role not allowed")
+        raise HTTPException(400, "Username existed" if success is None else "Role not allowed")
     if data.role.lower() == MANAGER:
         raise HTTPException(403, "You cannot register as a manager")
     return {"message": f"Successfully register '{data.username}'"}
@@ -96,10 +96,11 @@ def logout(request: Request, response: Response):
 
     if session_id:
         try:
-            auth_service.logout(session_id)
+            success = auth_service.logout(session_id)
         except Exception as e:
             raise HTTPException(500, e)
-
+    if not success:
+        raise HTTPException(404, "Session not found")
     response.delete_cookie("session_id")
 
     return {"message": "Logged out"}
@@ -123,9 +124,11 @@ def customer_view_orders(table_number: int):
 @app.post("/customer/order/{table_number}", tags=[CUSTOMER.capitalize()])
 def order(table_number: int, data: OrderRequest):
     try:
-        customer_service.order_item(table_number, data.item_id, data.note, data.quantity)
+        success = customer_service.order_item(table_number, data.item_id, data.note, data.quantity)
     except Exception as e:
         raise HTTPException(500, e)
+    if not success:
+        raise HTTPException(404, "Menu not found")
     return {"message": "Order created"}
 
 @app.patch("/customer/cancel/{order_id}", tags=[CUSTOMER.capitalize()])
@@ -274,7 +277,7 @@ def create_staff_account(data: RegisterRequest, session_data: tuple[User | None,
     except Exception as e:
         raise HTTPException(500, e)
     if not success:
-        raise HTTPException(400, "Username existed or role not allowed")
+        raise HTTPException(400, "Username existed" if success is None else "Role not allowed")
     auth_service.refresh_session(session_id)
     return {"message": f"Successfully register '{data.username}'"}
 
@@ -306,7 +309,7 @@ def update_staff_role(staff_id: str, role: str, session_data: tuple[User | None,
     except Exception as e:
         raise HTTPException(500, e)
     if not success:
-        raise HTTPException(400, "Role not allowed")
+        raise HTTPException(404, "Staff not found") if success is None else HTTPException(400, "Role not allowed")
     auth_service.refresh_session(session_id)
     return {"message": "Successfully update role"}
 
@@ -320,9 +323,11 @@ def delete_staff_account(staff_id: str, session_data: tuple[User | None, str] = 
     if user.id == staff_id:
         raise HTTPException(400, "Cannot delete yourself")
     try:
-        manager_service.delete_staff_account(staff_id)
+        success = manager_service.delete_staff_account(staff_id)
     except Exception as e:
         raise HTTPException(500, e)
+    if not success:
+        raise HTTPException(404, "Staff not found")
     auth_service.refresh_session(session_id)
     return {"message": "Staff account deleted"}
 
@@ -362,9 +367,11 @@ def update_menu(item_id: int, data: UpdateMenuRequest, session_data: tuple[User 
     if user.role.lower() != MANAGER:
         raise HTTPException(403, "For manager only")
     try:
-        manager_service.update_dish_info(item_id, data.item_name, data.description, data.price)
+        success = manager_service.update_dish_info(item_id, data.item_name, data.description, data.price)
     except Exception as e:
         raise HTTPException(500, e)
+    if not success:
+        raise HTTPException(404, "Menu not found")
     auth_service.refresh_session(session_id)
     return {"message": "Successfully update menu"}
 
@@ -376,8 +383,10 @@ def delete_menu(item_id: int, session_data: tuple[User | None, str] = Depends(ge
     if user.role.lower() != MANAGER:
         raise HTTPException(403, "For manager only")
     try:
-        manager_service.delete_dish(item_id)
+        success = manager_service.delete_dish(item_id)
     except Exception as e:
         raise HTTPException(500, e)
+    if not success:
+        raise HTTPException(404, "Menu not found")
     auth_service.refresh_session(session_id)
     return {"message": "Menu deleted"}

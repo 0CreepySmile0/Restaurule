@@ -23,8 +23,8 @@ class SessionRepo:
         self.db.execute(query, (session_id, user_id, expires))
         return session_id
 
-    def get_active_session_by_id(self, session_id):
-        query = "SELECT * FROM sessions WHERE id = ? AND expires_at > CURRENT_TIMESTAMP"
+    def get_session_by_id(self, session_id, is_active=True):
+        query = "SELECT * FROM sessions WHERE id = ?" + (" AND expires_at > CURRENT_TIMESTAMP" if is_active else "")
         session = self.db.fetchone(query, (session_id,))
         if not session:
             return None

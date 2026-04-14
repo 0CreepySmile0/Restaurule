@@ -8,9 +8,15 @@ class CustomerService:
         self.order_repo = order_repo
 
     def order_item(self, table_number, item_id, note="", quantity=1):
+        """Return None when item_id not found, True otherwise"""
+        item = self.item_repo.get_item_by_id(item_id)
+        if item is None:
+            return None
         self.order_repo.create_order(table_number, item_id, note, quantity)
+        return True
 
     def cancel_order(self, order_id):
+        """Return None when order_id not found, False when invalid order status, True otherwise"""
         order = self.order_repo.get_order_by_id(order_id)
         if order is None:
             return None

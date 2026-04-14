@@ -31,10 +31,7 @@ class OrderRepo:
         self.db.execute(query, (table_number, item_id, note, quantity, PENDING_STATUS))
 
     def get_order_by_id(self, order_id):
-        query = """
-        SELECT * FROM orders
-        WHERE id = ?
-        """
+        query = "SELECT * FROM orders WHERE id = ?"
         order = self.db.fetchone(query, (order_id,))
         if not order:
             return None
@@ -61,11 +58,7 @@ class OrderRepo:
         return [Order(**order) for order in orders]
 
     def update_order_status(self, order_id, status):
-        query = """
-        UPDATE orders
-        SET status = ?
-        WHERE id = ?
-        """
+        query = "UPDATE orders SET status = ? WHERE id = ?"
         self.db.execute(query, (status, order_id))
 
     def delete_order(self, order_id):

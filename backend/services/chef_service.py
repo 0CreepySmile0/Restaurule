@@ -6,6 +6,7 @@ class ChefService:
         self.order_repo = order_repo
 
     def cook_dish(self, order_id):
+        """Return None when order_id not found, False when invalid order status, True otherwise"""
         order = self.order_repo.get_order_by_id(order_id)
         if order is None:
             return None
@@ -15,7 +16,10 @@ class ChefService:
         return True
 
     def cancel_order(self, order_id):
-        """In case of insufficient ingredient to cook for that order"""
+        """
+        In case of insufficient ingredient to cook for that order
+        Return None when order_id not found, False when invalid order status, True otherwise
+        """
         order = self.order_repo.get_order_by_id(order_id)
         if order is None:
             return None
@@ -28,6 +32,7 @@ class ChefService:
         return self.order_repo.get_orders_by_status([PENDING_STATUS, COOKING_STATUS])
 
     def done_dish(self, order_id):
+        """Return None when order_id not found, False when invalid order status, True otherwise"""
         order = self.order_repo.get_order_by_id(order_id)
         if order is None:
             return None
