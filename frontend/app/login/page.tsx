@@ -18,7 +18,11 @@ export default function Page() {
     try {
       const res = await login({ username, password }) as any;
       const role = res?.role;
-      if (role) router.push(`/${role}`);
+      if (role) {
+        if (role == "manager"){
+          router.push(`/${role}/staff`)
+        } else router.push(`/${role}`)
+      } 
       else setError(res?.message || "Unexpected response from server");
     } catch (err: any) {
       setError("Incorrect username or password");
