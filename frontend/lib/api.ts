@@ -5,8 +5,25 @@ type MenuItem = {
   price: number;
 };
 
-type Order = any;
-type User = any;
+type Order = {
+  id: number;
+  table_number: number;
+  item_id: number;
+  item_name: string;
+  note?: string | null;
+  quantity?: number;
+  status?: string;
+  price: number
+};
+
+type User = {
+  id: string;
+  username: string;
+  password: string;
+  first: string;
+  last: string;
+  role: string;
+};
 
 const BASE = (process.env.NEXT_PUBLIC_BASE_API_URL || "").replace(/\/$/, "");
 
