@@ -13,9 +13,11 @@ class Order(BaseModel):
     id: int
     table_number: int
     item_id: int
+    item_name: str
     note: Optional[str] = None
     quantity: Optional[int] = 1
     status: Optional[str] = PENDING_STATUS
+    price: float
 
 
 class OrderRepo:
@@ -23,12 +25,12 @@ class OrderRepo:
     def __init__(self, db: DBConnector):
         self.db = db
 
-    def create_order(self, table_number, item_id, note, quantity):
+    def create_order(self, table_number, item, note, quantity):
         query = """
-        INSERT INTO orders (table_number, item_id, note, quantity, status)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO orders (table_number, item_id, item_name, note, quantity, status, price)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """
-        self.db.execute(query, (table_number, item_id, note, quantity, PENDING_STATUS))
+        self.db.execute(query, (table_number, item.id, item.item_name, note, quantity, PENDING_STATUS, quantity*item.price))
 
     def get_order_by_id(self, order_id):
         query = "SELECT * FROM orders WHERE id = ?"

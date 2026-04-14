@@ -12,7 +12,7 @@ class CustomerService:
         item = self.item_repo.get_item_by_id(item_id)
         if item is None:
             return None
-        self.order_repo.create_order(table_number, item_id, note, quantity)
+        self.order_repo.create_order(table_number, item, note, quantity)
         return True
 
     def cancel_order(self, order_id):
@@ -37,8 +37,7 @@ class CustomerService:
         all_id = []
         success = True
         for order in orders:
-            item = self.item_repo.get_item_by_id(order.item_id)
-            total += (item.price * order.quantity)
+            total += order.price
             if order.status == SERVED_STATUS:
                 all_id.append(order.id)
             else:

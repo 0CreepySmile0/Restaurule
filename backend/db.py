@@ -28,9 +28,11 @@ CREATE_TABLES = [
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		table_number INTEGER NOT NULL,
 		item_id INTEGER NOT NULL,
+        item_name TEXT NOT NULL,
 		note TEXT,
 		quantity INTEGER DEFAULT 1,
 		status TEXT,
+        price REAL NOT NULL,
 		FOREIGN KEY(item_id) REFERENCES items(id)
 	)
 	""",
