@@ -157,19 +157,6 @@ def customer_cancel(order_id: int):
     
     return {"message": "Order cancelled"}
 
-@app.get("/customer/checkout/{table_number}", tags=[CUSTOMER.capitalize()])
-def checkout_orders(table_number: int):
-    try:
-        total, success = customer_service.checkout(table_number)
-    except Exception as e:
-        raise HTTPException(500, e)
-    
-    return {
-        "total": total,
-        "checkout_success": success,
-        "message": "Successfully checkout" if success else f"Can checkout only when all orders are '{SERVED_STATUS}'"
-    }
-
 @app.get("/chef", response_model=list[Order], tags=[CHEF.capitalize()])
 def chef_view_orders(session_data: tuple[User | None, str] = Depends(get_current_user)):
     user, session_id = session_data
@@ -269,6 +256,24 @@ def serve_order(order_id: int, session_data: tuple[User | None, str] = Depends(g
         raise HTTPException(400, f"Can only serve order with '{SERVING_STATUS}' status")
     auth_service.refresh_session(session_id)
     return {"message": "You served the order!"}
+
+@app.patch("/waiter/checkout/{table_number}", tags=[WAITER.capitalize()])
+def checkout_orders(table_number: int, session_data: tuple[User | None, str] = Depends(get_current_user)):
+    user, session_id = session_data
+    if user is None:
+        raise HTTPException(403, "For waiter only")
+    if user.role.lower() not in [WAITRESS, WAITER]:
+        raise HTTPException(403, "For waiter only")
+    try:
+        total, success = waiter_service.checkout(table_number)
+    except Exception as e:
+        raise HTTPException(500, e)
+    auth_service.refresh_session(session_id)
+    return {
+        "total": total,
+        "checkout_success": success,
+        "message": "Successfully checkout" if success else f"Can checkout only when all orders are '{SERVED_STATUS}'"
+    }
 
 @app.post("/manager/staff", status_code=201, tags=[MANAGER.capitalize()])
 def create_staff_account(data: RegisterRequest, session_data: tuple[User | None, str] = Depends(get_current_user)):

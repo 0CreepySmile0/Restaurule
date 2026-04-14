@@ -1,4 +1,4 @@
-from backend.repository.order_repo import OrderRepo, SERVED_STATUS, SERVING_STATUS, COOKING_STATUS
+from backend.repository.order_repo import OrderRepo, SERVED_STATUS, SERVING_STATUS, COOKING_STATUS, PAID_STATUS
 
 class WaiterService:
 
@@ -16,3 +16,20 @@ class WaiterService:
             return False
         self.order_repo.update_order_status(order_id, SERVED_STATUS)
         return True
+
+    def checkout(self, table_number):
+        orders = self.order_repo.get_all_orders(True, table_number)
+        total = 0
+        all_id = []
+        success = True
+        for order in orders:
+            total += order.price
+            if order.status == SERVED_STATUS:
+                all_id.append(order.id)
+            else:
+                success = False
+        
+        if success:
+            for order_id in all_id:
+                self.order_repo.update_order_status(order_id, PAID_STATUS)
+        return total, success

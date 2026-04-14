@@ -30,20 +30,3 @@ class CustomerService:
 
     def view_menu(self):
         return self.item_repo.get_all_items()
-
-    def checkout(self, table_number):
-        orders = self.order_repo.get_all_orders(True, table_number)
-        total = 0
-        all_id = []
-        success = True
-        for order in orders:
-            total += order.price
-            if order.status == SERVED_STATUS:
-                all_id.append(order.id)
-            else:
-                success = False
-        
-        if success:
-            for order_id in all_id:
-                self.order_repo.update_order_status(order_id, PAID_STATUS)
-        return total, success
