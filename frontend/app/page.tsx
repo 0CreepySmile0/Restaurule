@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { getMenu, postCustomerOrder } from "../lib/api";
 
 type MenuItem = {
@@ -29,7 +30,7 @@ export default function Home() {
 
   useEffect(() => {
     // Table number persistence: check localStorage for existing table and expiry
-    const STORAGE_KEY = "restaurule_table";
+    const STORAGE_KEY = "table_number";
     const TTL = 2 * 60 * 60 * 1000; // 2 hours in ms
 
     try {
@@ -77,7 +78,7 @@ export default function Home() {
   }, []);
 
   const saveTableNumber = (n: number) => {
-    const STORAGE_KEY = "restaurule_table";
+    const STORAGE_KEY = "table_number";
     const TTL = 2 * 60 * 60 * 1000; // 2 hours
     const payload = { tableNumber: n, ts: Date.now() };
     try {
@@ -107,7 +108,18 @@ export default function Home() {
     new Intl.NumberFormat("en-US", { style: "currency", currency: "THB", minimumFractionDigits: 2 }).format(n);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black font-sans p-6">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black font-sans p-6 pt-20">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#0b0b0b] border-b border-zinc-100 dark:border-zinc-800">
+        <div className="w-full max-w-3xl mx-auto p-4 flex items-center">
+          <div>
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{appName}</h1>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Our menu — freshly fetched from the kitchen</p>
+          </div>
+          <div className="ml-auto">
+            <Link href="/orders" className="px-3 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">My orders</Link>
+          </div>
+        </div>
+      </div>
       <div className="w-full max-w-3xl">
         {showTablePrompt && (
           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50">
@@ -176,11 +188,8 @@ export default function Home() {
             </form>
           </div>
         )}
-        <header className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-            {appName}
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Our menu — freshly fetched from the kitchen</p>
+        <header className="mb-6 pt-2">
+          {/* spacer header — actual header is fixed to viewport */}
         </header>
 
         <main className="bg-white dark:bg-[#0b0b0b] rounded-lg shadow-sm divide-y divide-zinc-100 dark:divide-zinc-800 overflow-hidden">
