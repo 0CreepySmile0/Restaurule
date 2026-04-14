@@ -83,7 +83,7 @@ def register(data: RegisterRequest):
 @app.post("/login", status_code=201, tags=[AUTH.capitalize()])
 def login(response: Response, data: LoginRequest):
     try:
-        session_id = auth_service.login(data.username, data.password)
+        session_id, role = auth_service.login(data.username, data.password)
     except Exception as e:
         raise HTTPException(500, e)
 
@@ -99,7 +99,7 @@ def login(response: Response, data: LoginRequest):
         samesite="lax"
     )
 
-    return {"message": "Logged in"}
+    return {"message": "Logged in", "role": role}
 
 @app.post("/logout", tags=[AUTH.capitalize()])
 def logout(request: Request, response: Response):
@@ -110,8 +110,8 @@ def logout(request: Request, response: Response):
             success = auth_service.logout(session_id)
         except Exception as e:
             raise HTTPException(500, e)
-    if not success:
-        raise HTTPException(404, "Session not found")
+        if not success:
+            raise HTTPException(404, "Session not found")
     response.delete_cookie("session_id")
 
     return {"message": "Logged out"}
