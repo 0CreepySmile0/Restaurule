@@ -20,6 +20,7 @@ export default function Home() {
   const [showTablePrompt, setShowTablePrompt] = useState(false);
   const [tableInput, setTableInput] = useState("");
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [pendingItem, setPendingItem] = useState<MenuItem | null>(null);
   const [orderNote, setOrderNote] = useState("");
   const [orderQuantity, setOrderQuantity] = useState<number>(1);
   const [ordering, setOrdering] = useState(false);
@@ -46,18 +47,12 @@ export default function Home() {
           setTimeout(() => {
             localStorage.removeItem(STORAGE_KEY);
             setTableNumber(null);
-            setShowTablePrompt(true);
           }, TTL - age);
         } else {
           localStorage.removeItem(STORAGE_KEY);
-          setShowTablePrompt(true);
         }
-      } else {
-        setShowTablePrompt(true);
       }
-    } catch (e) {
-      setShowTablePrompt(true);
-    }
+    } catch (e) {}
 
     let mounted = true;
     setLoading(true);
@@ -88,6 +83,13 @@ export default function Home() {
     }
     setTableNumber(n);
     setShowTablePrompt(false);
+    if (pendingItem) {
+      setSelectedItem(pendingItem);
+      setOrderNote("");
+      setOrderQuantity(1);
+      setOrderError(null);
+      setPendingItem(null);
+    }
     setTimeout(() => {
       try {
         localStorage.removeItem(STORAGE_KEY);
@@ -206,17 +208,27 @@ export default function Home() {
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  setSelectedItem(it);
-                  setOrderNote("");
-                  setOrderQuantity(1);
-                  setOrderError(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
+                  if (tableNumber != null) {
                     setSelectedItem(it);
                     setOrderNote("");
                     setOrderQuantity(1);
                     setOrderError(null);
+                  } else {
+                    setPendingItem(it);
+                    setShowTablePrompt(true);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    if (tableNumber != null) {
+                      setSelectedItem(it);
+                      setOrderNote("");
+                      setOrderQuantity(1);
+                      setOrderError(null);
+                    } else {
+                      setPendingItem(it);
+                      setShowTablePrompt(true);
+                    }
                   }
                 }}
                 className="flex items-start justify-between p-6 hover:bg-zinc-50 dark:hover:bg-zinc-900 cursor-pointer"
