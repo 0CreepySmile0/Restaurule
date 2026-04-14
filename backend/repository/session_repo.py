@@ -6,8 +6,8 @@ from backend.db import DBConnector
 SESSION_DURATION = timedelta(days=1)
 
 class Session(BaseModel):
-    id: uuid.UUID
-    user_id: uuid.UUID
+    id: str
+    user_id: str
     expires_at: datetime
 
 
@@ -23,8 +23,8 @@ class SessionRepo:
         self.db.execute(query, (session_id, user_id, expires))
         return session_id
 
-    def get_active_session_by_id(self, session_id):
-        query = "SELECT * FROM sessions WHERE id = ? AND expires_at > CURRENT_TIMESTAMP"
+    def get_session_by_id(self, session_id, is_active=True):
+        query = "SELECT * FROM sessions WHERE id = ?" + (" AND expires_at > CURRENT_TIMESTAMP" if is_active else "")
         session = self.db.fetchone(query, (session_id,))
         if not session:
             return None
@@ -34,6 +34,11 @@ class SessionRepo:
         query = "SELECT * FROM sessions" + (" WHERE expires_at > CURRENT_TIMESTAMP" if is_active else "")
         sessions = self.db.fetchall(query)
         return [Session(**session) for session in sessions]
+
+    def refresh_session(self, session_id):
+        new_expiry = datetime.now() + SESSION_DURATION
+        query = "UPDATE sessions SET expires_at = ? WHERE id = ?"
+        self.db.execute(query, (new_expiry, session_id))
 
     def delete_session(self, session_id):
         query = "DELETE FROM sessions WHERE id = ?"

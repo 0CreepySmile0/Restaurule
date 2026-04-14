@@ -1,4 +1,6 @@
 fastapi
 uvicorn
-passlib[bcrypt]
+passlib
 pydantic
+argon2_cffi
+python-dotenv

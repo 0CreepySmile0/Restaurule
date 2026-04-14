@@ -10,6 +10,8 @@ class WaiterService:
 
     def serve_dish(self, order_id):
         order = self.order_repo.get_order_by_id(order_id)
+        if order is None:
+            return None
         if order.status != SERVING_STATUS:
             return False
         self.order_repo.update_order_status(order_id, SERVED_STATUS)

@@ -22,11 +22,7 @@ class ItemRepo:
         self.db.execute(query, (item_name, description, price))
 
     def get_item_by_id(self, item_id):
-        query = """
-        SELECT * FROM items
-        WHERE id = ?
-        """
-        item = self.db.fetchone(query, (item_id,))
+        item = self.db.fetchone("SELECT * FROM items WHERE id = ?", (item_id,))
         if not item:
             return None
         return Item(**item)
