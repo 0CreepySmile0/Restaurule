@@ -14,6 +14,10 @@ export default function Page() {
   const [actionLoading, setActionLoading] = useState<string | number | null>(null);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const appCurrency = process.env.NEXT_PUBLIC_APP_CURRENCY || "USD"
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: appCurrency, minimumFractionDigits: 2 }).format(n);
+
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function load() {
@@ -95,7 +99,7 @@ export default function Page() {
               <div className="text-sm text-zinc-600">{item.description}</div>
             </div>
             <div className="flex gap-2 items-center">
-              <div className="text-sm">{item.price}</div>
+              <div className="text-sm">{fmt(item.price)}</div>
               <button onClick={() => { setModal({ type: "edit", item }); setForm({ item_name: item.item_name, description: item.description || "", price: item.price }); }} className="px-3 py-1 bg-yellow-500 rounded text-white">Edit</button>
               <button onClick={() => setModal({ type: "delete", item })} className="px-3 py-1 bg-red-600 rounded text-white">Delete</button>
             </div>

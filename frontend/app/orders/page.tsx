@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { getCustomerOrders, cancelOrder, Order } from "../../lib/api";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +13,7 @@ export default function OrdersPage() {
   const [pendingCancelId, setPendingCancelId] = useState<number | null>(null);
 
   const router = useRouter();
+  const appCurrency = process.env.NEXT_PUBLIC_APP_CURRENCY || "USD"
 
   useEffect(() => {
     try {
@@ -44,7 +44,7 @@ export default function OrdersPage() {
   }, []);
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "THB", minimumFractionDigits: 2 }).format(n);
+    new Intl.NumberFormat("en-US", { style: "currency", currency: appCurrency, minimumFractionDigits: 2 }).format(n);
 
   const total = orders.reduce((s, o) => s + (o.price ?? 0) * (o.quantity ?? 1), 0);
 
@@ -82,7 +82,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black font-sans p-6 pt-20">
+    <div className="min-h-screen flex items-top justify-center bg-zinc-50 dark:bg-black font-sans p-6 pt-45">
       <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#0b0b0b] border-b border-zinc-100 dark:border-zinc-800">
         <div className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between">
           <div>
@@ -138,7 +138,7 @@ export default function OrdersPage() {
                       </div>
                       <div className="text-right flex flex-col items-end gap-2">
                         <div className="font-semibold text-zinc-900 dark:text-zinc-50">{fmt(o.price)}</div>
-                        <div className="text-sm text-zinc-500 dark:text-zinc-400">{o.status ?? "pending"}</div>
+                        <div className={`text-sm ${o.status === "served" ? "text-green-600" : o.status === "pending" ? "text-zinc-400" : "text-yellow-600"}`}>{o.status ?? "pending"}</div>
                         {String(o.status).toLowerCase() === "pending" && (
                           <button
                             onClick={() => setPendingCancelId(o.id)}

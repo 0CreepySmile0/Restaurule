@@ -13,6 +13,10 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const appCurrency = process.env.NEXT_PUBLIC_APP_CURRENCY || "USD"
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: appCurrency, minimumFractionDigits: 2 }).format(n);
+
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function load() {
@@ -95,14 +99,15 @@ export default function Page() {
           return (
             <div key={table} className="p-4 border rounded bg-white dark:bg-zinc-800">
               <div className="flex justify-between items-center">
-                <div className="font-medium">Table #{tnum}</div>
-                <div className="text-sm">Total: {total}</div>
+                <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 bg-white/0 dark:bg-transparent">Table #{tnum}</div>
+                <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 bg-white/0 dark:bg-transparent">Total: {fmt(total)}</div>
               </div>
               <div className="mt-3 space-y-2">
                 {items.map(it => (
                   <div key={it.id} className="flex justify-between items-center">
                     <div>
                       <div className="font-medium">{it.item_name} <span className="text-sm">x{it.quantity ?? 1}</span></div>
+                      <div className={`text-sm ${it.status === "served" ? "text-green-600" : it.status === "pending" ? "text-zinc-400" : "text-yellow-600"}`}>{it.status}</div>
                       <div className="text-sm text-zinc-600">{it.note ?? ""}</div>
                     </div>
                     <div className="flex gap-2">
@@ -111,7 +116,7 @@ export default function Page() {
                           {actionLoading === it.id ? "..." : "Serve"}
                         </button>
                       )}
-                      <div className="text-sm">{it.status}</div>
+                      <div className="text-sm">{fmt(it.price)}</div>
                     </div>
                   </div>
                 ))}

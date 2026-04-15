@@ -13,6 +13,10 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const appCurrency = process.env.NEXT_PUBLIC_APP_CURRENCY || "USD"
+  const fmt = (n: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: appCurrency, minimumFractionDigits: 2 }).format(n);
+
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -117,9 +121,9 @@ export default function Page() {
               <div>
                 <div className="font-medium">Table #{order.table_number} — {order.item_name}</div>
                 <div className="text-sm text-zinc-600 dark:text-zinc-300">Qty: {order.quantity ?? 1} • {order.note ?? ""}</div>
-                <div className="text-sm">Price: {order.price}</div>
+                <div className="text-sm">Status: <strong className={`text-sm ${order.status === "served" ? "text-green-600" : order.status === "pending" ? "text-zinc-400" : "text-yellow-600"}`}>{order.status}</strong></div>
               </div>
-              <div className="text-sm">Status: <strong>{order.status}</strong></div>
+              <div className="text-sm">{fmt(order.price)}</div>
             </div>
             <div className="mt-3 flex gap-2">
               {order.status === "pending" && (
