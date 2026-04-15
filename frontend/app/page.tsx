@@ -30,7 +30,8 @@ export default function Home() {
 
   const router = useRouter();
 
-  const appName = process.env.NEXT_PUBLIC_RESTAURANT_NAME || "Restaurule";
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || "Restaurule";
+  const appQuote = process.env.NEXT_PUBLIC_APP_QUOTE || "Our menu our rule — freshly from the kitchen"
 
   useEffect(() => {
     // Table number persistence: check localStorage for existing table and expiry
@@ -146,7 +147,7 @@ export default function Home() {
         <div className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{appName}</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Our menu — freshly fetched from the kitchen</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{appQuote}</p>
           </div>
           <div className="ml-auto">
             <button type="button" onClick={handleOrdersClick} className="px-3 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">My orders</button>
