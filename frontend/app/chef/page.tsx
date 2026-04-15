@@ -9,6 +9,7 @@ export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [confirmCancelId, setConfirmCancelId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
@@ -48,7 +49,8 @@ export default function Page() {
     setActionLoading(id);
     try {
       await finishOrder(id);
-      setOrders(prev => prev.map(o => (o.id === id ? { ...o, status: "serving" } : o)));
+      // remove the order from the list when finished
+      setOrders(prev => prev.filter(o => o.id !== id));
     } catch (err: any) {
       setError(err?.message || String(err));
     } finally {
@@ -61,6 +63,24 @@ export default function Page() {
     try {
       await chefCancel(id);
       setOrders(prev => prev.filter(o => o.id !== id));
+    } catch (err: any) {
+      setError(err?.message || String(err));
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  function confirmCancel(id: number) {
+    setConfirmCancelId(id);
+  }
+
+  async function doConfirmCancel() {
+    if (confirmCancelId == null) return;
+    setActionLoading(confirmCancelId);
+    try {
+      await chefCancel(confirmCancelId);
+      setOrders(prev => prev.filter(o => o.id !== confirmCancelId));
+      setConfirmCancelId(null);
     } catch (err: any) {
       setError(err?.message || String(err));
     } finally {
@@ -114,13 +134,26 @@ export default function Page() {
                 </button>
               )}
 
-              <button onClick={() => handleCancel(order.id)} disabled={actionLoading === order.id} className="px-3 py-1 bg-red-600 rounded text-white">
+              <button onClick={() => confirmCancel(order.id)} disabled={actionLoading === order.id} className="px-3 py-1 bg-red-600 rounded text-white">
                 {actionLoading === order.id ? "..." : "Cancel"}
               </button>
             </div>
           </div>
         ))}
       </div>
+
+      {confirmCancelId != null && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-zinc-800 p-6 rounded w-full max-w-md">
+            <h2 className="text-lg mb-3">Cancel Order</h2>
+            <div>Are you sure you want to cancel this order?</div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setConfirmCancelId(null)} className="px-3 py-1 rounded">No</button>
+              <button onClick={doConfirmCancel} disabled={actionLoading === confirmCancelId} className="px-3 py-1 bg-red-600 text-white rounded">{actionLoading === confirmCancelId ? "Cancelling..." : "Yes, cancel"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

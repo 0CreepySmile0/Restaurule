@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getMenu, postCustomerOrder } from "../lib/api";
 
 type MenuItem = {
@@ -26,6 +26,9 @@ export default function Home() {
   const [ordering, setOrdering] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
   const [orderSuccess, setOrderSuccess] = useState<string | null>(null);
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const appName = process.env.NEXT_PUBLIC_RESTAURANT_NAME || "Restaurule";
 
@@ -90,6 +93,11 @@ export default function Home() {
       setOrderError(null);
       setPendingItem(null);
     }
+    if (pendingRedirect) {
+      const dest = pendingRedirect;
+      setPendingRedirect(null);
+      router.push(dest);
+    }
     setTimeout(() => {
       try {
         localStorage.removeItem(STORAGE_KEY);
@@ -97,6 +105,29 @@ export default function Home() {
       setTableNumber(null);
       setShowTablePrompt(true);
     }, TTL);
+  };
+
+  const handleOrdersClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    try {
+      const raw = localStorage.getItem("table_number");
+      if (!raw) {
+        setPendingRedirect("/orders");
+        setShowTablePrompt(true);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      const num = parsed?.tableNumber ?? null;
+      if (num == null) {
+        setPendingRedirect("/orders");
+        setShowTablePrompt(true);
+        return;
+      }
+      router.push("/orders");
+    } catch (err) {
+      setPendingRedirect("/orders");
+      setShowTablePrompt(true);
+    }
   };
 
   const handleTableSubmit = (e?: React.FormEvent) => {
@@ -112,13 +143,13 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black font-sans p-6 pt-20">
       <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#0b0b0b] border-b border-zinc-100 dark:border-zinc-800">
-        <div className="w-full max-w-3xl mx-auto p-4 flex items-center">
+        <div className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">{appName}</h1>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Our menu — freshly fetched from the kitchen</p>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{appName}</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Our menu — freshly fetched from the kitchen</p>
           </div>
           <div className="ml-auto">
-            <Link href="/orders" className="px-3 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">My orders</Link>
+            <button type="button" onClick={handleOrdersClick} className="px-3 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">My orders</button>
           </div>
         </div>
       </div>

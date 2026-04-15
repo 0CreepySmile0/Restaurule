@@ -81,8 +81,9 @@ export default function Page() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl">Manager — Menu</h1>
         <div className="flex gap-2">
-            <button onClick={() => { setModal({ type: "create" }); setForm({ item_name: "", description: "", price: 0 }); }} className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
-            <button onClick={handleLogout} disabled={logoutLoading} className="px-3 py-1 bg-gray-600 text-white rounded">{logoutLoading ? "Logging out..." : "Logout"}</button>
+          <button onClick={() => router.push('/manager/staff')} className="px-3 py-1 bg-indigo-600 text-white rounded">Manage Staff</button>
+          <button onClick={() => { setModal({ type: "create" }); setForm({ item_name: "", description: "", price: 0 }); }} className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
+          <button onClick={handleLogout} disabled={logoutLoading} className="px-3 py-1 bg-gray-600 text-white rounded">{logoutLoading ? "Logging out..." : "Logout"}</button>
         </div>
       </div>
       {error && <div className="text-sm text-red-600 mb-2">{error}</div>}

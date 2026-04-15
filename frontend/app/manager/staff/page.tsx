@@ -85,6 +85,7 @@ export default function Page() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl">Manager — Staff</h1>
         <div className="flex gap-2">
+          <button onClick={() => router.push('/manager/menu')} className="px-3 py-1 bg-indigo-600 text-white rounded">Manage Menu</button>
           <button onClick={() => { setModal({ type: "create" }); setForm({ username: "", password: "", first: "", last: "", role: ROLES[0] }); }} className="px-3 py-1 bg-blue-600 text-white rounded">Create</button>
           <button onClick={handleLogout} disabled={logoutLoading} className="px-3 py-1 bg-gray-600 text-white rounded">{logoutLoading ? "Logging out..." : "Logout"}</button>
         </div>
@@ -112,11 +113,11 @@ export default function Page() {
             <h2 className="text-lg mb-3">Create Staff</h2>
             <div className="space-y-2">
               <input placeholder="username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} className="w-full p-2 border rounded" />
-              <input placeholder="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} className="w-full p-2 border rounded" />
+              <input type="password" placeholder="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} className="w-full p-2 border rounded" />
               <input placeholder="first" value={form.first} onChange={e => setForm({ ...form, first: e.target.value })} className="w-full p-2 border rounded" />
               <input placeholder="last" value={form.last} onChange={e => setForm({ ...form, last: e.target.value })} className="w-full p-2 border rounded" />
               <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} className="w-full p-2 border rounded">
-                {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                {ROLES.map(r => <option key={r} value={r} className="text-black">{r}</option>)}
               </select>
             </div>
             <div className="mt-4 flex justify-end gap-2">
@@ -132,7 +133,7 @@ export default function Page() {
           <div className="bg-white dark:bg-zinc-800 p-6 rounded w-full max-w-md">
             <h2 className="text-lg mb-3">Update Role — {modal.staff.username}</h2>
             <select defaultValue={modal.staff.role} onChange={e => setModal({ ...modal, staff: { ...modal.staff!, role: e.target.value } })} className="w-full p-2 border rounded">
-              {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+              {ROLES.map(r => <option key={r} value={r} className="text-black">{r}</option>)}
             </select>
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setModal({ type: null })} className="px-3 py-1 rounded">Cancel</button>

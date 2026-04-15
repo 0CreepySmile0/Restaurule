@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCustomerOrders, cancelOrder, Order } from "../../lib/api";
+import { useRouter } from "next/navigation";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -11,6 +12,8 @@ export default function OrdersPage() {
   const [tableNumber, setTableNumber] = useState<number | null>(null);
   const [cancelingIds, setCancelingIds] = useState<number[]>([]);
   const [pendingCancelId, setPendingCancelId] = useState<number | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -42,6 +45,8 @@ export default function OrdersPage() {
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "THB", minimumFractionDigits: 2 }).format(n);
+
+  const total = orders.reduce((s, o) => s + (o.price ?? 0) * (o.quantity ?? 1), 0);
 
   const handleCancel = async (orderId: number) => {
     if (cancelingIds.includes(orderId)) return;
@@ -78,6 +83,18 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black font-sans p-6 pt-20">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#0b0b0b] border-b border-zinc-100 dark:border-zinc-800">
+        <div className="w-full max-w-3xl mx-auto p-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">My orders</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Table: {tableNumber ?? "—"}</p>
+          </div>
+          <div className="ml-auto">
+            <button onClick={() => router.push("/")} className="px-3 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">Back to menu</button>
+          </div>
+        </div>
+      </div>
+
       <div className="w-full max-w-3xl">
         {pendingCancelId != null && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -99,17 +116,11 @@ export default function OrdersPage() {
           </div>
         )}
         <div className="bg-white dark:bg-[#0b0b0b] rounded-lg shadow-sm divide-y divide-zinc-100 dark:divide-zinc-800 overflow-hidden">
-          <div className="p-6 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">My orders</h1>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">Table: {tableNumber ?? "—"}</p>
-            </div>
-            <div className="ml-auto">
-              <Link href="/" className="px-3 py-2 bg-zinc-900 hover:bg-zinc-700 text-white rounded">Back to menu</Link>
-            </div>
-          </div>
 
           <div className="p-6">
+            <div className="sticky z-40 mb-4 flex justify-end">
+              <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 bg-white/0 dark:bg-transparent px-2">Total: {loading ? "…" : fmt(total)}</div>
+            </div>
             {loading ? (
               <div className="text-center text-zinc-600">Loading orders…</div>
             ) : error ? (
