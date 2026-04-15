@@ -46,7 +46,7 @@ export default function OrdersPage() {
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: appCurrency, minimumFractionDigits: 2 }).format(n);
 
-  const total = orders.reduce((s, o) => s + (o.price ?? 0) * (o.quantity ?? 1), 0);
+  const total = orders.reduce((s, o) => s + (o.price ?? 0), 0);
 
   const handleCancel = async (orderId: number) => {
     if (cancelingIds.includes(orderId)) return;

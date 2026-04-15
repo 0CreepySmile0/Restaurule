@@ -94,7 +94,7 @@ export default function Page() {
         {Object.keys(grouped).length === 0 && <div>No active tables</div>}
         {Object.entries(grouped).map(([table, items]) => {
           const tnum = Number(table);
-          const total = items.reduce((s, it) => s + ((it.quantity ?? 1) * (it.price ?? 0)), 0);
+          const total = items.reduce((s, it) => s + (it.price ?? 0), 0);
           const allServed = items.every(it => it.status === "served");
           return (
             <div key={table} className="p-4 border rounded bg-white dark:bg-zinc-800">
