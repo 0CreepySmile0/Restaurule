@@ -106,7 +106,7 @@ export async function serveOrder(orderId: number) {
 }
 
 export async function checkout(tableNumber: number) {
-  return request(`/waiter/checkout/${tableNumber}`);
+  return request(`/waiter/checkout/${tableNumber}`, { method: "PATCH" });
 }
 
 // Manager: staff
