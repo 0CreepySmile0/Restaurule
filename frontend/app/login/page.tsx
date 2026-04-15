@@ -21,6 +21,8 @@ export default function Page() {
       if (role) {
         if (role == "manager"){
           router.push(`/${role}/staff`)
+        } else if (role == "waitress") {
+          router.push(`/waiter`)
         } else router.push(`/${role}`)
       } 
       else setError(res?.message || "Unexpected response from server");
