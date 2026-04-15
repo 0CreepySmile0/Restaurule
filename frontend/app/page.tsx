@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getMenu, postCustomerOrder } from "../lib/api";
 
@@ -29,13 +28,13 @@ export default function Home() {
   const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
 
   const router = useRouter();
+  const STORAGE_KEY = "table_number";
 
   const appName = process.env.NEXT_PUBLIC_APP_NAME || "Restaurule";
   const appQuote = process.env.NEXT_PUBLIC_APP_QUOTE || "Our menu our rule — freshly from the kitchen"
 
   useEffect(() => {
     // Table number persistence: check localStorage for existing table and expiry
-    const STORAGE_KEY = "table_number";
     const TTL = 2 * 60 * 60 * 1000; // 2 hours in ms
 
     try {
@@ -77,7 +76,6 @@ export default function Home() {
   }, []);
 
   const saveTableNumber = (n: number) => {
-    const STORAGE_KEY = "table_number";
     const TTL = 2 * 60 * 60 * 1000; // 2 hours
     const payload = { tableNumber: n, ts: Date.now() };
     try {
@@ -223,7 +221,6 @@ export default function Home() {
           </div>
         )}
         <header className="mb-6 pt-2">
-          {/* spacer header — actual header is fixed to viewport */}
         </header>
 
         <main className="bg-white dark:bg-[#0b0b0b] rounded-lg shadow-sm divide-y divide-zinc-100 dark:divide-zinc-800 overflow-hidden">
@@ -240,7 +237,8 @@ export default function Home() {
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  if (tableNumber != null) {
+                  const num = localStorage.getItem(STORAGE_KEY)
+                  if (num != null) {
                     setSelectedItem(it);
                     setOrderNote("");
                     setOrderQuantity(1);
@@ -252,7 +250,8 @@ export default function Home() {
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    if (tableNumber != null) {
+                    const num = localStorage.getItem(STORAGE_KEY)
+                    if (num != null) {
                       setSelectedItem(it);
                       setOrderNote("");
                       setOrderQuantity(1);
