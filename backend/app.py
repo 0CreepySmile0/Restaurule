@@ -31,8 +31,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-db = DBConnector(os.environ.get("DB_FILE", "app.db"), os.environ.get("MOCK_DATA", False))
+db = DBConnector(os.environ.get("DB_FILE", "app.db"), True if os.environ.get("MOCK_DATA").capitalize() == "True" else False)
+print()
 session_repo = SessionRepo(db)
 user_repo = UserRepo(db)
 item_repo = ItemRepo(db)
