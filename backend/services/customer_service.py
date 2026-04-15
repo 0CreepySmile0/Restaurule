@@ -12,7 +12,7 @@ class CustomerService:
         item = self.item_repo.get_item_by_id(item_id)
         if item is None:
             return None
-        self.order_repo.create_order(table_number, item_id, note, quantity)
+        self.order_repo.create_order(table_number, item, note, quantity)
         return True
 
     def cancel_order(self, order_id):
@@ -30,21 +30,3 @@ class CustomerService:
 
     def view_menu(self):
         return self.item_repo.get_all_items()
-
-    def checkout(self, table_number):
-        orders = self.order_repo.get_all_orders(True, table_number)
-        total = 0
-        all_id = []
-        success = True
-        for order in orders:
-            item = self.item_repo.get_item_by_id(order.item_id)
-            total += (item.price * order.quantity)
-            if order.status == SERVED_STATUS:
-                all_id.append(order.id)
-            else:
-                success = False
-        
-        if success:
-            for order_id in all_id:
-                self.order_repo.update_order_status(order_id, PAID_STATUS)
-        return total, success
