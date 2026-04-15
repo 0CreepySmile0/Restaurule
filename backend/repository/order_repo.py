@@ -50,12 +50,12 @@ class OrderRepo:
             fields.append("table_number = ?")
             values.append(table_number)
 
-        query = "SELECT * FROM orders" + (f" WHERE {" AND ".join(fields)}" if fields else "")
+        query = "SELECT * FROM orders" + (" WHERE " + " AND ".join(fields) if fields else "")
         orders = self.db.fetchall(query, values)
         return [Order(**order) for order in orders]
 
     def get_orders_by_status(self, status: list[str]):
-        query = "SELECT * FROM orders" + (f" WHERE {" OR ".join(["status = ?" for _ in status])}" if status else "")
+        query = "SELECT * FROM orders" + (" WHERE " + " OR ".join(["status = ?" for _ in status]) if status else "")
         orders = self.db.fetchall(query, status)
         return [Order(**order) for order in orders]
 

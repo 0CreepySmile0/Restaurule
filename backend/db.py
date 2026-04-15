@@ -59,7 +59,7 @@ MOCK_DATA = [
     "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u2', 'chef', '$argon2id$v=19$m=65536,t=3,p=4$836vtbbWei+ltDYGYGxN6Q$p+a9FdGK5Azij6LYpdvUgTpy4FL6jORpapR5pphOj2Y', 'Bob', 'C', 'chef')",
     "INSERT OR IGNORE INTO users (id, username, password, first, last, role) VALUES ('u3', 'waiter', '$argon2id$v=19$m=65536,t=3,p=4$bO3dW0upVQrBGCPEGANACA$6NzWw0trXc5JCXkYfmmD2IdJFmg6we1JKH++kNEt2wI', 'Carol', 'W', 'waiter')",
 
-    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (1, 'Minced pork basil rice', 'Simple menu to order when you don't know what to eat', 40)",
+    "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (1, 'Minced pork basil rice', 'Simple menu to order when you don''t know what to eat', 40)",
     "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (2, 'Minced chicken basil rice', 'Another simple menu, but with chicken instead', 40)",
     "INSERT OR IGNORE INTO items (id, item_name, price) VALUES (3, 'Rice', 10)",
     "INSERT OR IGNORE INTO items (id, item_name, description, price) VALUES (4, 'Omelet with rice', '3 eggs', 25)"
